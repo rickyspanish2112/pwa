@@ -8,3 +8,8 @@ Once Node.js is installed, open your command prompt or terminal and **navigate i
 
 Finally, run `npm start` to start the development server and visit [localhost:8080](http://localhost:8080) to see the running application.
 Notes: the '-c-1' flag used when invoking 'start' stops the caching of assets in the broswer cache
+
+# External packages
+These packages allow for the use of promises at fetch features in older browsers and for use with service workers
+Promise.js - Pollyfil for older browsers
+Fetch.js - Pollyfil for older browsers
