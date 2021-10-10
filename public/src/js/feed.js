@@ -2,6 +2,9 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+var form = document.querySelector('form');
+var titleInput = document.querySelector('#title');
+var locationInput = document.querySelector('#location');
 
 
 function openCreatePostModal() {
@@ -96,10 +99,9 @@ function updateUi(data) {
   }
 }
 
-var url = 'https://pwagram-ce869-default-rtdb.europe-west1.firebasedatabase.app/posts.json';
 var networkDataReceived = false;
 // Cache then network strategy
-fetch(url)
+fetch('https://pwagram-ce869-default-rtdb.europe-west1.firebasedatabase.app/posts.json')
   .then(function (res) {
     return res.json();
   })
@@ -123,3 +125,60 @@ if ('indexedDB' in window) {
 
  })
 }
+
+function sendData() {
+  fetch('https://us-central1-pwagram-ce869.cloudfunctions.net/storePostData', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image: 'https://firebasestorage.googleapis.com/v0/b/pwagram-ce869.appspot.com/o/2021-10-03T17%3A38%3A30.579Z.png?alt=media&token=bffd171a-6c2d-48a9-bfb9-ff2c6ed75967'
+    })
+  })
+    .then(function(res) {
+      console.log('Sent data', res);
+      updateUI();
+    })
+}
+
+
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  if (titleInput.value.trim() === '' || locationInput.value.trim() === '') {
+    alert('Please enter valid data!');
+    return;
+  }
+
+  closeCreatePostModal();
+
+ if ('serviceWorker' in navigator && 'SyncManager' in window) {
+    navigator.serviceWorker.ready
+      .then(function(sw) {
+        var post = {
+          id: new Date().toISOString(),
+          title: titleInput.value,
+          location: locationInput.value
+        };
+        writeData('sync-posts', post)
+          .then(function() {
+            return sw.sync.register('sync-new-posts');
+          })
+          .then(function() {
+            var snackbarContainer = document.querySelector('#confirmation-toast');
+            var data = {message: 'Your Post was saved for syncing!'};
+            snackbarContainer.MaterialSnackbar.showSnackbar(data);
+          })
+          .catch(function(err) {
+            console.log(err);
+          });
+      });
+  } else {
+    sendData(); //To cator or older browswers we can just send data to the backen, without going via the SW
+  }
+});
