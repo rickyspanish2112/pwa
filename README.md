@@ -1,4 +1,5 @@
 # Progressive Web Apps - Complete Guide
+This is my forst apptemp at writing a PWA app. 
 This source code is part of Maximilian Schwarzmüller's "Progressive Web Apps - Complete Guide" course on udemy.com.
 
 # How to Use
